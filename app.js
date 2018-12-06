@@ -9,23 +9,24 @@ app.use(cookieParser());
 
 app.set('view engine', 'pug');
 
-app.get('/',(req, res) => {
-    res.render('index');
+const mainRoutes = require('./routes');
+const cardRoutes = require('./routes/cards');
+
+app.use(mainRoutes);
+app.use('/cards', cardRoutes);
+
+app.use((req, res, next) => {
+    const err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
-app.get('/cards',(req, res) => {
-    res.render('card', {prompt:"Who is buried in Grants Tomb", hint:"Think about whose tomb it is!"});
-});
+app.use((err, req, res, next) => {
+    res.locals.error = err;
+    res.status(err.status);
+    res.render('error');
+})
 
-app.get('/hello',(req, res) => {
-    res.render("hello", {name: req.cookies.username});
-});
-app.post('/hello',(req, res) => {
-    //console.dir(req.body);
-    res.cookie('username', req.body.username);
-    res.render("hello",{name: req.body.username});
-    
-});
 
 app.listen(3000, () => {
     console.log('The app is running on localhost:3000!')
